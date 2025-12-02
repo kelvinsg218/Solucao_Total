@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Logística - Login</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+    <!-- ======== TELA DE LOGIN ======== -->
+    <div id="login-container" class="container">
+        <div class="header">
+            <h1>Bem-vindo</h1>
+            <p>Login do sistema interno • Total Foods</p>
+        </div>
+
+        <form id="login-form" class="form">
+            <div class="input-group">
+                <label>Email</label>
+                <input id="login-email" type="email" required>
+            </div>
+
+            <div class="input-group">
+                <label>Senha</label>
+                <input id="login-password" type="password" required>
+            </div>
+
+            <button type="submit" class="btn">Entrar</button>
+        </form>
+    </div>
+
+    <script>
+        // =============================
+        // LOGIN SIMPLES COM LOCALSTORAGE
+        // =============================
+
+        // Usuário padrão salvo no navegador (exemplo)
+        const userData = {
+            email: "admin@totalfoods.com",
+            senha: "1234"
+        };
+
+        // Salva no navegador caso não exista
+        if (!localStorage.getItem("usuario")) {
+            localStorage.setItem("usuario", JSON.stringify(userData));
+        }
+
+        const loginForm = document.getElementById("login-form");
+
+        loginForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById("login-email").value;
+            const senha = document.getElementById("login-password").value;
+
+            const savedUser = JSON.parse(localStorage.getItem("usuario"));
+
+            if (email === savedUser.email && senha === savedUser.senha) {
+                alert("Login realizado com sucesso!");
+
+                // 🔥 REDIRECIONA PARA A PÁGINA DE CADASTRO
+                window.location.href = "index.html";
+            } else {
+                alert("Email ou senha incorretos.");
+            }
+        });
+    </script>
+
+</body>
+</html>

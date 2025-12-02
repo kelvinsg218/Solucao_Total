@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cadastro - Logística</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Cadastro de Colaborador</h1>
+            <p>Sistema interno • Logística</p>
+        </div>
+
+        <form class="form">
+
+            <h2>Dados Pessoais</h2>
+            <div class="grid">
+                <div class="input-group">
+                    <label>Nome Completo</label>
+                    <input type="text" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" required>
+                </div>
+
+                <div class="input-group">
+                    <label>CPF</label>
+                    <input type="text" maxlength="14" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Telefone</label>
+                    <input type="text" required>
+                </div>
+            </div>
+
+            <h2>Endereço</h2>
+            <div class="grid">
+                <div class="input-group">
+                    <label>CEP</label>
+                    <input type="text" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Endereço</label>
+                    <input type="text" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Número</label>
+                    <input type="text">
+                </div>
+
+                <div class="input-group">
+                    <label>Cidade</label>
+                    <input type="text" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Estado</label>
+                    <input type="text" required>
+                </div>
+            </div>
+
+            <h2>Dados da Empresa</h2>
+            <div class="grid">
+               <div class="input-group">
+                    <label>Armazém</label>
+                    <select required>
+                        <option value="">Selecione...</option>
+                        <option value="armazem1">Taquara</option>
+                        <option value="armazem2">Porto Canoa</option>
+                        <option value="armazem3">Civit II</option>
+                        <option value="armazem3">Log 101</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Contratação</label>
+                    <select required>
+                        <option value="">Selecione...</option>
+                        <option value="armazem1">Diarista</option>
+                        <option value="armazem2">Funcionario</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Setor</label>
+                    <input type="text" required>
+                </div>
+
+                 <div class="input-group">
+                    <label>Carga Horária</label>
+                    <select required>
+                        <option value="">Selecione...</option>
+                        <option value="armazem1">07:00 às 17:00</option>
+                        <option value="armazem2">08:00 às 18:00</option>
+                        <option value="armazem2">09:00 às 19:00</option>
+                        <option value="armazem2">10:00 às 20:00</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">Salvar Cadastro</button>
+        </form>
+    </div>
+
+</body>
+</html>
