@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lista de Colaboradores</title>
+
+  <!-- BOOTSTRAP CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body { background: #f3f3f3; padding: 20px; }
+    .container-box { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .table thead th { cursor: pointer; user-select: none; }
+    .small-gap { gap: .5rem; display: inline-flex; }
+  </style>
+</head>
+<body>
+
+  <div class="container container-box mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>Lista de Colaboradores</h2>
+      <a href="../cadastro/cadastro.html" class="btn btn-primary">+ Novo Colaborador</a>
+    </div>
+
+    <!-- Busca -->
+    <input type="text" id="busca" class="form-control mb-3" placeholder="Buscar por nome, CPF, cidade, setor...">
+
+    <!-- Tabela -->
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead class="table-primary">
+          <tr>
+            <th onclick="ordenar('nome')">Nome</th>
+            <th onclick="ordenar('cpf')">CPF</th>
+            <th onclick="ordenar('email')">E-mail</th>
+            <th onclick="ordenar('telefone')">Telefone</th>
+            <th onclick="ordenar('cidade')">Cidade</th>
+            <th onclick="ordenar('contratacao')">Contratação</th>
+            <th onclick="ordenar('setor')">Setor</th>
+            <th onclick="ordenar('carga')">Carga Horária</th>
+            <th onclick="ordenar('status')">Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaColaboradores"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Status -->
+  <div class="modal fade" id="modalStatus" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title">Status do Colaborador</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Nome:</strong> <span id="statusNome"></span></p>
+          <p><strong>CPF:</strong> <span id="statusCPF"></span></p>
+          <p><strong>E-mail:</strong> <span id="statusEmail"></span></p>
+          <p><strong>Telefone:</strong> <span id="statusTelefone"></span></p>
+          <p><strong>Cidade:</strong> <span id="statusCidade"></span></p>
+          <hr>
+          <p><strong>Contratação:</strong> <span id="statusContratacao"></span></p>
+          <p><strong>Setor:</strong> <span id="statusSetor"></span></p>
+          <p><strong>Carga Horária:</strong> <span id="statusCarga"></span></p>
+          <p><strong>Status:</strong> <span id="statusSituacao"></span></p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOOTSTRAP BUNDLE (JS + Popper) necessário pro modal -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+  // ====== DADOS INICIAIS ======
+  let colaboradores = JSON.parse(localStorage.getItem("colaboradores")) || [];
+  let ordemAsc = true;
+
+  // Util: read field safely (supports carga or cargaHoraria)
+  function getCarga(colab) {
+    if (colab.carga) return colab.carga;
+    if (colab.cargaHoraria) return colab.cargaHoraria;
+    return "-";
+  }
+
+  // ====== LISTAR ======
+  function listar(lista = colaboradores) {
+    const tabela = document.getElementById("tabelaColaboradores");
+    tabela.innerHTML = "";
+
+    if (!lista.length) {
+      tabela.innerHTML = "<tr><td colspan='10' class='text-center'>Nenhum colaborador cadastrado.</td></tr>";
+      return;
+    }
+
+    lista.forEach((colab, i) => {
+      const carga = getCarga(colab);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${colab.nome || "-"}</td>
+        <td>${colab.cpf || "-"}</td>
+        <td>${colab.email || "-"}</td>
+        <td>${colab.telefone || "-"}</td>
+        <td>${colab.cidade || "-"}</td>
+        <td>${colab.contratacao || "-"}</td>
+        <td>${colab.setor || "-"}</td>
+        <td>${carga}</td>
+        <td>${colab.status || "-"}</td>
+        <td>
+          <div class="small-gap">
+            <button class="btn btn-warning btn-sm" onclick="editar(${i})">Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="excluir(${i})">Excluir</button>
+            <button class="btn btn-info btn-sm" onclick="statusColaborador(${i})">Status</button>
+          </div>
+        </td>
+      `;
+      tabela.appendChild(tr);
+    });
+  }
+
+  // ====== FILTRO / BUSCA ======
+  document.getElementById("busca").addEventListener("input", function() {
+    const termo = this.value.trim().toLowerCase();
+    if (!termo) { listar(); return; }
+
+    const filtrados = colaboradores.filter(c =>
+      (c.nome || "").toLowerCase().includes(termo) ||
+      (c.cpf || "").toLowerCase().includes(termo) ||
+      (c.cidade || "").toLowerCase().includes(termo) ||
+      (c.setor || "").toLowerCase().includes(termo) ||
+      (c.contratacao || "").toLowerCase().includes(termo)
+    );
+    listar(filtrados);
+  });
+
+  // ====== ORDENAR ======
+  function ordenar(campo) {
+    colaboradores.sort((a,b) => {
+      const A = (a[campo] || "").toString().toLowerCase();
+      const B = (b[campo] || "").toString().toLowerCase();
+      if (A < B) return ordemAsc ? -1 : 1;
+      if (A > B) return ordemAsc ? 1 : -1;
+      return 0;
+    });
+    ordemAsc = !ordemAsc;
+    listar();
+  }
+
+  // ====== EDITAR ======
+  function editar(i) {
+    // redireciona para cadastro com id
+    window.location.href = `../cadastro/cadastro.html?id=${i}`;
+  }
+
+  // ====== EXCLUIR ======
+  function excluir(i) {
+    if (!confirm("Deseja realmente excluir este colaborador?")) return;
+    colaboradores.splice(i,1);
+    localStorage.setItem("colaboradores", JSON.stringify(colaboradores));
+    listar();
+  }
+
+  // ====== STATUS (mostra modal) ======
+  function statusColaborador(i) {
+    const c = colaboradores[i];
+    if (!c) return;
+
+    // Preencher modal (uso coalescência para evitar undefined)
+    document.getElementById("statusNome").innerText = c.nome || "-";
+    document.getElementById("statusCPF").innerText = c.cpf || "-";
+    document.getElementById("statusEmail").innerText = c.email || "-";
+    document.getElementById("statusTelefone").innerText = c.telefone || "-";
+    document.getElementById("statusCidade").innerText = c.cidade || "-";
+    document.getElementById("statusContratacao").innerText = c.contratacao || "-";
+    document.getElementById("statusSetor").innerText = c.setor || "-";
+    document.getElementById("statusCarga").innerText = getCarga(c);
+    document.getElementById("statusSituacao").innerText = c.status || "Não definido";
+
+    // Exibe modal (Bootstrap 5)
+    const modalEl = document.getElementById("modalStatus");
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  }
+
+  // Inicializa listagem
+  listar();
+
+  </script>
+</body>
+</html>

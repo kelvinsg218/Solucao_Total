@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cadastro - Logística</title>
+    <link rel="stylesheet" href="cadastro.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Cadastro de Colaborador</h1>
+            <p>Sistema interno • Logística</p>
+        </div>
+
+<form class="form">
+
+    <h2>Dados Pessoais</h2>
+    <div class="grid">
+
+        <div class="input-group">
+            <label>Nome Completo</label>
+            <input id="nome" type="text" placeholder="Ex: João da Silva" required>
+        </div>
+
+        <div class="input-group">
+            <label>Email</label>
+            <input id="email" type="email" placeholder="Ex: joao.silva@empresa.com" required>
+        </div>
+
+        <div class="input-group">
+            <label>CPF</label>
+            <input id="cpf" type="text" maxlength="14" placeholder="Ex: 123.456.789-00" oninput="mascaraCPF(this)" required>
+        </div>
+
+        <div class="input-group">
+            <label>Telefone</label>
+            <input id="telefone" type="text" maxlength="15" placeholder="Ex: (11) 91234-5678" oninput="mascaraTelefone(this)" required>
+        </div>
+
+        
+    </div>
+
+    <h2>Endereço</h2>
+    <div class="grid">
+
+        <div class="input-group">
+            <label>CEP</label>
+            <input id="cep" type="text" maxlength="9" placeholder="Ex: 29100-000" oninput="mascaraCEP(this); buscarCEP(this.value)" required>
+        </div>
+
+        <div class="input-group">
+            <label>Endereço</label>
+            <input id="endereco" type="text" placeholder="Ex: Rua das Flores" required>
+        </div>
+
+        <div class="input-group">
+            <label>Número</label>
+            <input id="numero" type="text" placeholder="Ex: 120">
+        </div>
+
+        <div class="input-group">
+            <label>Cidade</label>
+            <input id="cidade" type="text" placeholder="Ex: Serra" required>
+        </div>
+
+        <div class="input-group">
+            <label>Estado</label>
+            <input id="estado" type="text" maxlength="2" placeholder="Ex: ES" required>
+        </div>
+
+    </div>
+
+    <h2>Dados da Empresa</h2>
+    <div class="grid">
+
+        <div class="input-group">
+            <label>Armazém</label>
+            <select id="armazem" required>
+                <option value="">Selecione...</option>
+                <option value="Taquara">Taquara</option>
+                <option value="Porto Canoa">Porto Canoa</option>
+                <option value="Civit II">Civit II</option>
+                <option value="Log 101">Log 101</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Contratação</label>
+            <select id="contratacao" required>
+                <option value="">Selecione...</option>
+                <option value="Diarista">Diarista</option>
+                <option value="Funcionário">Funcionário</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Setor</label>
+            <input id="setor" type="text" placeholder="Ex: Separação" required>
+        </div>
+
+        <div class="input-group">
+            <label>Carga Horária</label>
+            <select id="carga" required>
+                <option value="">Selecione...</option>
+                <option value="07:00 às 17:00">07:00 às 17:00</option>
+                <option value="08:00 às 18:00">08:00 às 18:00</option>
+                <option value="09:00 às 19:00">09:00 às 19:00</option>
+                <option value="10:00 às 20:00">10:00 às 20:00</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Status</label>
+            <select id="status" required>
+                <option value="">Selecione...</option>
+                <option value="ativo">Ativo</option>
+                <option value="inativo">Inativo</option>
+            </select>
+        </div>
+
+
+    </div>
+
+    <button type="submit" class="btn">Salvar Cadastro</button>
+</form>
+
+    </div>
+
+<script>
+/* ============================================================
+   ------ CARREGAR DADOS SE ESTIVER EDITANDO -------
+   ============================================================ */
+const urlParams = new URLSearchParams(window.location.search);
+const idEdicao = urlParams.get("id");
+
+if (idEdicao !== null) {
+    const lista = JSON.parse(localStorage.getItem("colaboradores")) || [];
+    const colab = lista[idEdicao];
+
+    if (colab) {
+        document.getElementById("nome").value = colab.nome;
+        document.getElementById("email").value = colab.email;
+        document.getElementById("cpf").value = colab.cpf;
+        document.getElementById("telefone").value = colab.telefone;
+        document.getElementById("cep").value = colab.cep;
+        document.getElementById("endereco").value = colab.endereco;
+        document.getElementById("numero").value = colab.numero;
+        document.getElementById("cidade").value = colab.cidade;
+        document.getElementById("estado").value = colab.estado;
+        document.getElementById("armazem").value = colab.armazem;
+        document.getElementById("contratacao").value = colab.contratacao;
+        document.getElementById("setor").value = colab.setor;
+        document.getElementById("carga").value = colab.carga;
+        document.getElementById("status").value = colab.status;
+    }
+}
+
+/* ============================================================
+   ------ SALVAR NOVO OU EDITAR EXISTENTE -------
+   ============================================================ */
+document.querySelector(".form").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const colaborador = {
+        nome: nome.value,
+        email: email.value,
+        cpf: cpf.value,
+        telefone: telefone.value,
+        cep: cep.value,
+        endereco: endereco.value,
+        numero: numero.value,
+        cidade: cidade.value,
+        estado: estado.value,
+        armazem: armazem.value,
+        contratacao: contratacao.value,
+        setor: setor.value,
+        carga: carga.value,
+        status: status.value,
+    };
+
+    let lista = JSON.parse(localStorage.getItem("colaboradores")) || [];
+
+    if (idEdicao !== null) {
+        // EDITAR
+        lista[idEdicao] = colaborador;
+        alert("Colaborador atualizado com sucesso!");
+    } else {
+        // NOVO
+        lista.push(colaborador);
+        alert("Colaborador cadastrado com sucesso!");
+    }
+
+    localStorage.setItem("colaboradores", JSON.stringify(lista));
+
+    window.location.href = "../lista/lista.html";
+});
+
+
+/* ============================================================
+   ------ MÁSCARAS + CEP (mantidas) -------
+   ============================================================ */
+
+function somenteLetras(input){ input.value=input.value.replace(/[^a-zA-ZÀ-ÿ\s]/g,""); }
+function somenteNumeros(input){ input.value=input.value.replace(/\D/g,""); }
+
+function mascaraCPF(input){
+    let v=input.value.replace(/\D/g,"").slice(0,11);
+    v=v.replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d{2})$/,"$1-$2");
+    input.value=v;
+}
+
+function mascaraTelefone(input){
+    let v=input.value.replace(/\D/g,"").slice(0,11);
+    v=v.replace(/(\d{2})(\d)/,"($1) $2").replace(/(\d{5})(\d)/,"$1-$2");
+    input.value=v;
+}
+
+function mascaraCEP(input){
+    let v=input.value.replace(/\D/g,"").slice(0,8);
+    v=v.replace(/(\d{5})(\d)/,"$1-$2");
+    input.value=v;
+}
+
+function mascaraEstado(input){
+    input.value=input.value.replace(/[^a-zA-Z]/g,"").toUpperCase().slice(0,2);
+}
+
+function buscarCEP(cep){
+    cep=cep.replace(/\D/g,"");
+    if(cep.length===8){
+        fetch(`https://viacep.com.br/ws/${cep}/json/`)
+        .then(r=>r.json())
+        .then(data=>{
+            if(data.erro){ alert("CEP não encontrado!"); return; }
+            endereco.value=data.logradouro||"";
+            cidade.value=data.localidade||"";
+            estado.value=data.uf||"";
+        });
+    }
+}
+</script>
+
+</body>
+</html>
