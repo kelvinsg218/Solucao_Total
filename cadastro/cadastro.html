@@ -111,12 +111,12 @@
             </select>
         </div>
 
-        <div class="input-group">
-            <label>Status</label>
-            <select id="status" required>
-                <option value="">Selecione...</option>
-                <option value="ativo">Ativo</option>
-                <option value="inativo">Inativo</option>
+          <div class="input-group">
+            <label>Ativo</label>
+            <select id="ativo" required>
+                <option value="Selecione...">Selecione...</option>
+                <option value="Sim">Sim</option>
+                <option value="Não">Não</option>
             </select>
         </div>
 
@@ -153,7 +153,7 @@ if (idEdicao !== null) {
         document.getElementById("contratacao").value = colab.contratacao;
         document.getElementById("setor").value = colab.setor;
         document.getElementById("carga").value = colab.carga;
-        document.getElementById("status").value = colab.status;
+        document.getElementById("ativo").value = colab.ativo;
     }
 }
 
@@ -177,7 +177,7 @@ document.querySelector(".form").addEventListener("submit", function(e) {
         contratacao: contratacao.value,
         setor: setor.value,
         carga: carga.value,
-        status: status.value,
+        ativo: ativo.value,
     };
 
     let lista = JSON.parse(localStorage.getItem("colaboradores")) || [];

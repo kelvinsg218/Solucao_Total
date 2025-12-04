@@ -39,7 +39,7 @@
             <th onclick="ordenar('contratacao')">Contratação</th>
             <th onclick="ordenar('setor')">Setor</th>
             <th onclick="ordenar('carga')">Carga Horária</th>
-            <th onclick="ordenar('status')">Status</th>
+            <th onclick="ordenar('ativo')">Ativo</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -66,7 +66,7 @@
           <p><strong>Contratação:</strong> <span id="statusContratacao"></span></p>
           <p><strong>Setor:</strong> <span id="statusSetor"></span></p>
           <p><strong>Carga Horária:</strong> <span id="statusCarga"></span></p>
-          <p><strong>Status:</strong> <span id="statusSituacao"></span></p>
+          <p><strong>Ativo:</strong> <span id="statusSituacao"></span></p>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
@@ -112,7 +112,7 @@
         <td>${colab.contratacao || "-"}</td>
         <td>${colab.setor || "-"}</td>
         <td>${carga}</td>
-        <td>${colab.status || "-"}</td>
+        <td>${colab.ativo || "-"}</td>
         <td>
           <div class="small-gap">
             <button class="btn btn-warning btn-sm" onclick="editar(${i})">Editar</button>
@@ -181,7 +181,7 @@
     document.getElementById("statusContratacao").innerText = c.contratacao || "-";
     document.getElementById("statusSetor").innerText = c.setor || "-";
     document.getElementById("statusCarga").innerText = getCarga(c);
-    document.getElementById("statusSituacao").innerText = c.status || "Não definido";
+    document.getElementById("statusSituacao").innerText = c.ativo || "-";
 
     // Exibe modal (Bootstrap 5)
     const modalEl = document.getElementById("modalStatus");
