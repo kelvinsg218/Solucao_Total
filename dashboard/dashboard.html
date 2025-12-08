@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Logística</title>
+
+    <!-- BOOTSTRAP -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- CHART.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { background: #f3f3f3; padding: 20px; }
+        .card-box {
+            background: white; padding: 20px; border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h2 { font-weight: bold; }
+        .kpi-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .kpi-value {
+            font-size: 2.3rem;
+            font-weight: bold;
+        }
+        .kpi-title {
+            font-size: .9rem;
+            color: #666;
+        }
+
+        #graficoArmazem {
+    width: 300px !important;
+    height: 300px !important;
+    margin: auto;
+}
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Dashboard de Colaboradores</h2>
+        <a href="../lista/lista.html" class="btn btn-primary">← Voltar para a Lista</a>
+    </div>
+
+    <!-- KPIs -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="kpi-box">
+                <div class="kpi-value" id="kpiTotal">0</div>
+                <div class="kpi-title">Total de Colaboradores</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="kpi-box">
+                <div class="kpi-value" id="kpiAtivos">0</div>
+                <div class="kpi-title">Ativos</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="kpi-box">
+                <div class="kpi-value" id="kpiInativos">0</div>
+                <div class="kpi-title">Inativos</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="kpi-box">
+                <div class="kpi-value" id="kpiDiaristas">0</div>
+                <div class="kpi-title">Diaristas</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card-box">
+                <h5 class="text-center">Colaboradores por Setor</h5>
+                <canvas id="graficoSetor"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card-box">
+                <h5 class="text-center">Colaboradores por Armazém</h5>
+                <canvas id="graficoArmazem"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const colaboradores = JSON.parse(localStorage.getItem("colaboradores")) || [];
+
+// ============================
+// KPIs
+// ============================
+
+// Total
+document.getElementById("kpiTotal").innerText = colaboradores.length;
+
+// Ativos e inativos
+const ativos = colaboradores.filter(c =>
+    (c.status || "").trim().toLowerCase() === "sim"
+);
+
+const inativos = colaboradores.filter(c =>
+    (c.status || "").trim().toLowerCase() === "não"
+);
+
+// Diaristas
+const diaristas = colaboradores.filter(c =>
+    (c.contratacao || "").trim().toLowerCase() === "diarista"
+);
+
+document.getElementById("kpiAtivos").innerText = ativos.length;
+document.getElementById("kpiInativos").innerText = inativos.length;
+document.getElementById("kpiDiaristas").innerText = diaristas.length;
+
+// ============================
+// Gráfico por Setor
+// ============================
+const setores = {};
+colaboradores.forEach(c => {
+    if (c.setor)
+        setores[c.setor] = (setores[c.setor] || 0) + 1;
+});
+
+new Chart(document.getElementById('graficoSetor'), {
+    type: 'bar',
+    data: {
+        labels: Object.keys(setores),
+        datasets: [{
+            label: 'Qtd',
+            data: Object.values(setores),
+            backgroundColor: 'rgba(54,162,235,0.7)'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } }
+    }
+});
+
+// ============================
+// Gráfico por Armazém
+// ============================
+const armazens = {};
+colaboradores.forEach(c => {
+    if (c.armazem)
+        armazens[c.armazem] = (armazens[c.armazem] || 0) + 1;
+});
+
+new Chart(document.getElementById('graficoArmazem'), {
+    type: 'pie',
+    data: {
+        labels: Object.keys(armazens),
+        datasets: [{
+            label: 'Qtd',
+            data: Object.values(armazens),
+            backgroundColor: [
+                '#36A2EB', '#FF6384',
+                '#FFCE56', '#4BC0C0'
+            ]
+        }]
+    },
+    options: { responsive: true }
+});
+
+</script>
+
+</body>
+</html>

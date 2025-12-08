@@ -123,73 +123,67 @@
     </div>
 
     <script>
-/* --- CARREGAR PARA EDIÇÃO (mantém seu código) --- */
-const urlParams = new URLSearchParams(window.location.search);
-const idEdicao = urlParams.get("id");
-if (idEdicao !== null) {
-    const lista = JSON.parse(localStorage.getItem("colaboradores")) || [];
-    const colab = lista[idEdicao];
-    if (colab) {
-        document.getElementById("nome").value = colab.nome || "";
-        document.getElementById("email").value = colab.email || "";
-        document.getElementById("cpf").value = colab.cpf || "";
-        document.getElementById("telefone").value = colab.telefone || "";
-        document.getElementById("cep").value = colab.cep || "";
-        document.getElementById("endereco").value = colab.endereco || "";
-        document.getElementById("numero").value = colab.numero || "";
-        document.getElementById("cidade").value = colab.cidade || "";
-        document.getElementById("estado").value = colab.estado || "";
-        document.getElementById("armazem").value = colab.armazem || "";
-        document.getElementById("contratacao").value = colab.contratacao || "";
-        document.getElementById("setor").value = colab.setor || "";
-        document.getElementById("carga").value = colab.carga || "";
-        // tenta preencher ambos campos (se existirem)
-        if (document.getElementById("status")) document.getElementById("status").value = colab.status || colab.ativo || "";
-        if (document.getElementById("ativo")) document.getElementById("ativo").value = colab.status || colab.ativo || "";
-    }
-}
+        // ====== PEGAR PARÂMETRO DE EDIÇÃO ======
+        const urlParams = new URLSearchParams(window.location.search);
+        const idEdicao = urlParams.get("id"); // null se não tiver parâmetro
 
-/* --- SALVAR (padroniza status) --- */
-document.querySelector(".form").addEventListener("submit", function(e) {
-    e.preventDefault();
+        // ====== CARREGAR DADOS PARA EDIÇÃO ======
+        if (idEdicao !== null) {
+            const lista = JSON.parse(localStorage.getItem("colaboradores")) || [];
+            const colab = lista[idEdicao];
+            if (colab) {
+                document.getElementById("nome").value = colab.nome || "";
+                document.getElementById("email").value = colab.email || "";
+                document.getElementById("cpf").value = colab.cpf || "";
+                document.getElementById("telefone").value = colab.telefone || "";
+                document.getElementById("cep").value = colab.cep || "";
+                document.getElementById("endereco").value = colab.endereco || "";
+                document.getElementById("numero").value = colab.numero || "";
+                document.getElementById("cidade").value = colab.cidade || "";
+                document.getElementById("estado").value = colab.estado || "";
+                document.getElementById("armazem").value = colab.armazem || "";
+                document.getElementById("contratacao").value = colab.contratacao || "";
+                document.getElementById("setor").value = colab.setor || "";
+                document.getElementById("carga").value = colab.carga || "";
+                document.getElementById("ativo").value = colab.status || colab.ativo || "";
+            }
+        }
 
-    // pega valor do select status (suporta id "status" ou "ativo")
-    const statusEl = document.getElementById("status") || document.getElementById("ativo");
-    const statusVal = statusEl ? statusEl.value : "";
+        // ====== SALVAR CADASTRO ======
+        document.querySelector(".form").addEventListener("submit", function (e) {
+            e.preventDefault();
 
-    const colaborador = {
-        nome: nome.value || "",
-        email: email.value || "",
-        cpf: cpf.value || "",
-        telefone: telefone.value || "",
-        cep: cep.value || "",
-        endereco: endereco.value || "",
-        numero: numero.value || "",
-        cidade: cidade.value || "",
-        estado: estado.value || "",
-        armazem: armazem.value || "",
-        contratacao: contratacao.value || "",
-        setor: setor.value || "",
-        carga: carga.value || "",
-        status: statusVal // salvo sempre em .status
-    };
+            const statusVal = document.getElementById("ativo").value;
 
-    let lista = JSON.parse(localStorage.getItem("colaboradores")) || [];
+            const colaborador = {
+                nome: nome.value,
+                email: email.value,
+                cpf: cpf.value,
+                telefone: telefone.value,
+                cep: cep.value,
+                endereco: endereco.value,
+                numero: numero.value,
+                cidade: cidade.value,
+                estado: estado.value,
+                armazem: armazem.value,
+                contratacao: contratacao.value,
+                setor: setor.value,
+                carga: carga.value,
+                status: statusVal
+            };
 
-    if (idEdicao !== null) {
-        lista[idEdicao] = colaborador;
-        alert("Colaborador atualizado com sucesso!");
-    } else {
-        lista.push(colaborador);
-        alert("Colaborador cadastrado com sucesso!");
-    }
+            let lista = JSON.parse(localStorage.getItem("colaboradores")) || [];
 
-    localStorage.setItem("colaboradores", JSON.stringify(lista));
+            if (idEdicao !== null) {
+                lista[idEdicao] = colaborador; // atualiza
+            } else {
+                lista.push(colaborador); // adiciona novo
+            }
 
-    window.location.href = "../lista/lista.html";
-});
-</script>
+            localStorage.setItem("colaboradores", JSON.stringify(lista));
 
-
+            window.location.href = "../lista/lista.html"; // redireciona
+        });
+    </script>
 </body>
 </html>
