@@ -1,0 +1,23 @@
+.botao-voltar-fixo {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+}
+
+
+body {
+    background: #f3f3f3;
+    padding: 20px;
+}
+.container-box {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.titulo-data {
+    font-size: 18px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}

@@ -1,210 +1,164 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Lista de Colaboradores</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Colaboradores</title>
 
-  <!-- BOOTSTRAP CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <style>
-    body { background: #f3f3f3; padding: 20px; }
-    .container-box { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .table thead th { cursor: pointer; user-select: none; }
-    .small-gap { gap: .5rem; display: inline-flex; }
-  </style>
+    <link rel="stylesheet" href="lista.css">
+    
 </head>
 <body>
 
-  <div class="container container-box mt-4">
+<div class="container container-box mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h2>Lista de Colaboradores</h2>
-      <div class="d-flex gap-2">
-        <a href="../pagina-registro/cadastro.html" class="btn btn-primary"> Novo Colaborador</a>
-        <a href="../dashboard/dashboard.html" class="btn btn-success">📊 Dashboard</a>
-        <button class="btn btn-outline-danger" id="btnLogout">Sair</button>
-      </div>
+        <h2>Lista de Colaboradores</h2>
+        <div class="d-flex gap-2">
+            <a href="../pagina-registro/cadastro.html" class="btn btn-primary"> Novo Colaborador</a>
+            <a href="../dashboard/dashboard.html" class="btn btn-success">📊 Dashboard</a>
+            <a href="../presença/presenca.html" class="btn btn-success">Lista de Presença</a>
+            <button class="btn btn-outline-danger" id="btnLogout">Sair</button>
+        </div>
     </div>
 
-    <!-- Busca -->
-    <input type="text" id="busca" class="form-control mb-3" placeholder="Buscar por nome, CPF, cidade, setor...">
+    <input id="busca" type="text" class="search" placeholder="Buscar por nome, CPF, cidade, setor...">
 
-    <!-- Tabela -->
-    <div class="table-responsive">
-      <table class="table table-striped table-hover">
-        <thead class="table-primary">
-          <tr>
-            <th onclick="ordenar('nome')">Nome</th>
-            <th onclick="ordenar('cpf')">CPF</th>
-            <th onclick="ordenar('email')">E-mail</th>
-            <th onclick="ordenar('telefone')">Telefone</th>
-            <th onclick="ordenar('cidade')">Cidade</th>
-            <th onclick="ordenar('contratacao')">Contratação</th>
-            <th onclick="ordenar('setor')">Setor</th>
-            <th onclick="ordenar('carga')">Carga Horária</th>
-            <th onclick="ordenar('status')">Status</th>
+    <table class="tabela">
+        <thead>
+        <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th>Cidade</th>
+            <th>Contratação</th>
+            <th>Setor</th>
+            <th>Carga Horária</th>
+            <th>Ativo</th>
             <th>Ações</th>
-          </tr>
+        </tr>
         </thead>
-        <tbody id="tabelaColaboradores"></tbody>
-      </table>
-    </div>
-  </div>
+        <tbody id="lista-colaboradores"></tbody>
+    </table>
 
-  <!-- Modal Status -->
-  <div class="modal fade" id="modalStatus" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-info text-white">
-          <h5 class="modal-title">Status do Colaborador</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
-        <div class="modal-body">
-          <p><strong>Nome:</strong> <span id="statusNome"></span></p>
-          <p><strong>CPF:</strong> <span id="statusCPF"></span></p>
-          <p><strong>E-mail:</strong> <span id="statusEmail"></span></p>
-          <p><strong>Telefone:</strong> <span id="statusTelefone"></span></p>
-          <p><strong>Cidade:</strong> <span id="statusCidade"></span></p>
-          <hr>
-          <p><strong>Contratação:</strong> <span id="statusContratacao"></span></p>
-          <p><strong>Setor:</strong> <span id="statusSetor"></span></p>
-          <p><strong>Carga Horária:</strong> <span id="statusCarga"></span></p>
-          <p><strong>Status:</strong> <span id="statusSituacao"></span></p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-        </div>
-      </div>
-    </div>
-  </div>
+    <p id="msg" class="msg"></p>
+</div>
 
-  <!-- BOOTSTRAP BUNDLE (JS + Popper) necessário pro modal -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const API_URL = "http://localhost:3000";
+    const token = localStorage.getItem("token");
 
-  <script>
-  // ====== VERIFICAÇÃO DE LOGIN ======
-  if (!localStorage.getItem("logado") || localStorage.getItem("logado") !== "true") {
-    // não está logado => volta pra login
-    window.location.href = "../login/login.html";
-  }
-
-  // botão logout
-  document.getElementById("btnLogout").addEventListener("click", function() {
-    if (!confirm("Deseja realmente sair?")) return;
-    localStorage.removeItem("logado");
-    localStorage.removeItem("usuarioLogado");
-    window.location.href = "../login/login.html";
-  });
-
-  // ====== DADOS INICIAIS ======
-  let colaboradores = JSON.parse(localStorage.getItem("colaboradores")) || [];
-  let ordemAsc = true;
-
-  function getCarga(colab) {
-    if (colab.carga) return colab.carga;
-    if (colab.cargaHoraria) return colab.cargaHoraria;
-    return "-";
-  }
-
-  // ====== LISTAR ======
-  function listar(lista = colaboradores) {
-    const tabela = document.getElementById("tabelaColaboradores");
-    tabela.innerHTML = "";
-
-    if (!lista.length) {
-      tabela.innerHTML = "<tr><td colspan='10' class='text-center'>Nenhum colaborador cadastrado.</td></tr>";
-      return;
+    // redireciona se não estiver logado
+    if(!token){
+        window.location.href = "../login/login.html";
     }
 
-    lista.forEach((colab, i) => {
-      const carga = getCarga(colab);
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${colab.nome || "-"}</td>
-        <td>${colab.cpf || "-"}</td>
-        <td>${colab.email || "-"}</td>
-        <td>${colab.telefone || "-"}</td>
-        <td>${colab.cidade || "-"}</td>
-        <td>${colab.contratacao || "-"}</td>
-        <td>${colab.setor || "-"}</td>
-        <td>${carga}</td>
-        <td>${colab.status || colab.ativo || "-"}</td>
-        <td>
-          <div class="small-gap">
-            <button class="btn btn-warning btn-sm" onclick="editar(${i})">Editar</button>
-            <button class="btn btn-danger btn-sm" onclick="excluir(${i})">Excluir</button>
-            <button class="btn btn-info btn-sm" onclick="statusColaborador(${i})">Status</button>
-          </div>
-        </td>
-      `;
-      tabela.appendChild(tr);
+    const lista = document.getElementById("lista-colaboradores");
+    const busca = document.getElementById("busca");
+
+    // ============================
+    //   CARREGAR LISTA
+    // ============================
+    async function carregar(){
+        try {
+            const resp = await fetch(`${API_URL}/colaboradores`, {
+                headers: { "Authorization": token }
+            });
+
+            const dados = await resp.json();
+            montar(dados);
+        } catch (e) {
+            document.getElementById("msg").textContent = "Erro ao carregar colaboradores.";
+        }
+    }
+
+    // ============================
+    //   MONTAR TABELA
+    // ============================
+    function montar(dados){
+        lista.innerHTML = "";
+
+        dados.forEach(c => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+            <td>${c.nome}</td>
+            <td>${c.cpf}</td>
+            <td>${c.email}</td>
+            <td>${c.telefone}</td>
+            <td>${c.cidade}</td>
+            <td>${c.contratacao}</td>
+            <td>${c.setor}</td>
+            <td>${c.carga}</td>
+            <td>${c.status}</td>
+            <td>
+                <button class="btn yellow" onclick="editar(${c.id})">Editar</button>
+                <button class="btn red" onclick="excluir(${c.id})">Excluir</button>
+                <button class="btn cyan">Status</button>
+            </td>
+        `;
+
+            lista.appendChild(tr);
+        });
+    }
+
+    // ============================
+    //   EDITAR
+    // ============================
+    function editar(id){
+        window.location.href = `../cadastro/cadastro.html?id=${id}`;
+    }
+
+    // ============================
+    //   EXCLUIR
+    // ============================
+    async function excluir(id){
+        if(!confirm("Tem certeza que deseja excluir?")) return;
+
+        try {
+            const resp = await fetch(`${API_URL}/colaboradores/${id}`, {
+                method: "DELETE",
+                headers: { "Authorization": token }
+            });
+
+            carregar();
+        } catch(e){
+            alert("Erro ao excluir.");
+        }
+    }
+
+    // ============================
+    //   BUSCA
+    // ============================
+    busca.addEventListener("input", async () => {
+        const termo = busca.value.toLowerCase();
+
+        const resp = await fetch(`${API_URL}/colaboradores`, {
+            headers: { "Authorization": token }
+        });
+
+        const dados = await resp.json();
+
+        const filtrados = dados.filter(c =>
+            c.nome.toLowerCase().includes(termo) ||
+            c.cpf.toLowerCase().includes(termo) ||
+            c.cidade.toLowerCase().includes(termo) ||
+            c.setor.toLowerCase().includes(termo)
+        );
+
+        montar(filtrados);
     });
-  }
 
-  // ====== FILTRO / BUSCA ======
-  document.getElementById("busca").addEventListener("input", function() {
-    const termo = this.value.trim().toLowerCase();
-    if (!termo) { listar(); return; }
+    // ============================
+    //   LOGOUT
+    // ============================
+    function logout(){
+        localStorage.clear();
+        window.location.href = "../login/login.html";
+    }
 
-    const filtrados = colaboradores.filter(c =>
-      (c.nome || "").toLowerCase().includes(termo) ||
-      (c.cpf || "").toLowerCase().includes(termo) ||
-      (c.cidade || "").toLowerCase().includes(termo) ||
-      (c.setor || "").toLowerCase().includes(termo) ||
-      (c.contratacao || "").toLowerCase().includes(termo)
-    );
-    listar(filtrados);
-  });
+    carregar();
+</script>
 
-  // ====== ORDENAR ======
-  function ordenar(campo) {
-    colaboradores.sort((a,b) => {
-      const A = (a[campo] || a[campo] === 0 ? (a[campo] || "") : (a[campo] || "")).toString().toLowerCase();
-      const B = (b[campo] || b[campo] === 0 ? (b[campo] || "") : (b[campo] || "")).toString().toLowerCase();
-      if (A < B) return ordemAsc ? -1 : 1;
-      if (A > B) return ordemAsc ? 1 : -1;
-      return 0;
-    });
-    ordemAsc = !ordemAsc;
-    listar();
-  }
-
-  // ====== EDITAR ======
-  function editar(i) {
-    window.location.href = "../pagina-registro/cadastro.html?id=" + i;
-  }
-
-  // ====== EXCLUIR ======
-  function excluir(i) {
-    if (!confirm("Deseja realmente excluir este colaborador?")) return;
-    colaboradores.splice(i,1);
-    localStorage.setItem("colaboradores", JSON.stringify(colaboradores));
-    listar();
-  }
-
-  // ====== STATUS (mostra modal) ======
-  function statusColaborador(i) {
-    const c = colaboradores[i];
-    if (!c) return;
-
-    document.getElementById("statusNome").innerText = c.nome || "-";
-    document.getElementById("statusCPF").innerText = c.cpf || "-";
-    document.getElementById("statusEmail").innerText = c.email || "-";
-    document.getElementById("statusTelefone").innerText = c.telefone || "-";
-    document.getElementById("statusCidade").innerText = c.cidade || "-";
-    document.getElementById("statusContratacao").innerText = c.contratacao || "-";
-    document.getElementById("statusSetor").innerText = c.setor || "-";
-    document.getElementById("statusCarga").innerText = getCarga(c);
-    document.getElementById("statusSituacao").innerText = c.status || c.ativo || "-";
-
-    const modalEl = document.getElementById("modalStatus");
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
-  }
-
-  // Inicializa listagem
-  listar();
-  </script>
 </body>
 </html>
