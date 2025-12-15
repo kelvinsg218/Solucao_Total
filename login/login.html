@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Logística - Login</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+    <div id="login-container" class="container">
+        <div class="header">
+            <h1>Bem-vindo</h1>
+            <p>Login do sistema interno • Total Foods</p>
+        </div>
+
+        <form id="login-form" class="form">
+            <div class="input-group">
+                <label>Email</label>
+                <input id="login-email" type="email" required>
+            </div>
+
+            <div class="input-group">
+                <label>Senha</label>
+                <input id="login-password" type="password" required>
+            </div>
+
+            <button type="submit" class="btn">Entrar</button>
+        </form>
+    </div>
+
+<script>
+// =============================
+// LOGIN SIMPLES COM LOCALSTORAGE
+// =============================
+
+const userData = {
+    email: "admin@totalfoods.com",
+    senha: "1234"
+};
+
+if (!localStorage.getItem("usuario")) {
+    localStorage.setItem("usuario", JSON.stringify(userData));
+}
+
+const loginForm = document.getElementById("login-form");
+
+loginForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById("login-email").value.trim();
+    const senha = document.getElementById("login-password").value;
+
+    const savedUser = JSON.parse(localStorage.getItem("usuario"));
+
+    if (email === savedUser.email && senha === savedUser.senha) {
+        // marca como logado e salva email do usuário
+        localStorage.setItem("logado", "true");
+        localStorage.setItem("usuarioLogado", email);
+
+        // redireciona para a lista
+        window.location.href = "../lista/lista.html";
+    } else {
+        alert("Email ou senha incorretos.");
+    }
+});
+</script>
+
+</body>
+</html>
