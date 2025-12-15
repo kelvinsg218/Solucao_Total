@@ -1,166 +1,260 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastrar Colaborador</title>
+    <title>Sistema de Cadastro - Logística</title>
     <link rel="stylesheet" href="cadastro.css">
 </head>
+
 <body>
-
-<div class="container">
-    <h1 id="titulo">Cadastrar Colaborador</h1>
-
-    <form id="form-colaborador">
-
-        <div class="input-group">
-            <label>Nome do colaborador</label>
-            <input type="text" id="nome" required>
+    <div class="container">
+        <div class="header">
+            <h1>Cadastro de Colaborador</h1>
+            <p>Sistema interno • Logística</p>
         </div>
 
-        <div class="input-group">
-            <label>Função</label>
-            <input type="text" id="funcao" required>
-        </div>
+        <form class="form" id="form-colaborador">
+            <h2>Dados Pessoais</h2>
+            <div class="grid">
+                <div class="input-group">
+                    <label>Nome Completo</label>
+                    <input id="nome" type="text" placeholder="Ex: João da Silva" required>
+                </div>
 
-        <div class="input-group">
-            <label>Valor da diária</label>
-            <input type="number" id="diaria" min="0" step="0.01" required>
-        </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input id="email" type="email" placeholder="Ex: joao.silva@empresa.com" required>
+                </div>
 
-        <div class="input-group">
-            <label>Tipo</label>
-            <select id="tipo" required>
-                <option value="diarista">Diarista</option>
-                <option value="fixo">Fixado</option>
-            </select>
-        </div>
+                <div class="input-group">
+                    <label>CPF</label>
+                    <input id="cpf" type="text" maxlength="14" placeholder="Ex: 123.456.789-00"
+                        oninput="mascaraCPF(this)" required>
+                </div>
 
-        <div class="input-group">
-            <label>Status</label>
-            <select id="status" required>
-                <option value="ativo">Ativo</option>
-                <option value="inativo">Inativo</option>
-            </select>
-        </div>
+                <div class="input-group">
+                    <label>Telefone</label>
+                    <input id="telefone" type="text" maxlength="15" placeholder="Ex: (11) 91234-5678"
+                        oninput="mascaraTelefone(this)" required>
+                </div>
+            </div>
 
-        <button class="btn" type="submit">Salvar</button>
-    </form>
+            <h2>Endereço</h2>
+            <div class="grid">
+                <div class="input-group">
+                    <label>CEP</label>
+                    <input id="cep" type="text" maxlength="9" placeholder="Ex: 29100-000"
+                        oninput="mascaraCEP(this); buscarCEP(this.value)" required>
+                </div>
 
-    <p id="msg" style="color:red; margin-top:10px;"></p>
+                <div class="input-group">
+                    <label>Endereço</label>
+                    <input id="endereco" type="text" placeholder="Ex: Rua das Flores" required>
+                </div>
 
-</div>
+                <div class="input-group">
+                    <label>Número</label>
+                    <input id="numero" type="text" placeholder="Ex: 120">
+                </div>
 
-<script>
-    const API_URL = "http://localhost:3000";
-    const token = localStorage.getItem("token");
+                <div class="input-group">
+                    <label>Cidade</label>
+                    <input id="cidade" type="text" placeholder="Ex: Serra" required>
+                </div>
 
-    // ============================
-    // VERIFICA LOGIN
-    // ============================
-    if (!token) {
-        window.location.href = "../login/login.html";
-    }
+                <div class="input-group">
+                    <label>Estado</label>
+                    <input id="estado" type="text" maxlength="2" placeholder="Ex: ES" required>
+                </div>
+            </div>
 
-    // ============================
-    // CAPTURA ID (EDIÇÃO)
-    // ============================
-    const urlParams = new URLSearchParams(window.location.search);
-    const colaboradorId = urlParams.get("id");
+            <h2>Dados da Empresa</h2>
+            <div class="grid">
+                <div class="input-group">
+                    <label>Armazém</label>
+                    <select id="armazem" required>
+                        <option value="">Selecione...</option>
+                        <option value="Taquara">Taquara</option>
+                        <option value="Porto Canoa">Porto Canoa</option>
+                        <option value="Civit II">Civit II</option>
+                        <option value="Log 101">Log 101</option>
+                    </select>
+                </div>
 
-    // Se for edição → carrega dados
-    if (colaboradorId) {
-        document.getElementById("titulo").textContent = "Editar Colaborador";
-        carregarColaborador();
-    }
+                <div class="input-group">
+                    <label>Contratação</label>
+                    <select id="contratacao" required>
+                        <option value="">Selecione...</option>
+                        <option value="Diarista">Diarista</option>
+                        <option value="Funcionário">Funcionário</option>
+                    </select>
+                </div>
 
-    // ============================
-    // FUNÇÃO PARA CARREGAR DADOS
-    // ============================
-    async function carregarColaborador() {
-        try {
-            const resp = await fetch(`${API_URL}/colaboradores/${colaboradorId}`, {
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+                <div class="input-group">
+                    <label>Setor</label>
+                    <input id="setor" type="text" placeholder="Ex: Separação" required>
+                </div>
 
-            const dados = await resp.json();
+                <div class="input-group">
+                    <label>Carga Horária</label>
+                    <select id="carga" required>
+                        <option value="">Selecione...</option>
+                        <option value="07:00 às 17:00">07:00 às 17:00</option>
+                        <option value="08:00 às 18:00">08:00 às 18:00</option>
+                        <option value="09:00 às 19:00">09:00 às 19:00</option>
+                        <option value="10:00 às 20:00">10:00 às 20:00</option>
+                    </select>
+                </div>
 
-            document.getElementById("nome").value = dados.nome;
-            document.getElementById("funcao").value = dados.funcao;
-            document.getElementById("diaria").value = dados.diaria;
-            document.getElementById("tipo").value = dados.tipo;
-            document.getElementById("status").value = dados.status;
+                <div class="input-group">
+                    <label>Ativo</label>
+                    <select id="ativo" required>
+                        <option value="">Selecione...</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                </div>
+            </div>
 
-        } catch (err) {
-            alert("Erro ao carregar colaborador.");
-            console.error(err);
+            <button type="submit" class="btn">Salvar Cadastro</button>
+        </form>
+    </div>
+
+    <script>
+
+        // ============ MÁSCARA CPF ==================
+        function mascaraCPF(campo) {
+            let v = campo.value.replace(/\D/g, "");
+
+            if (v.length > 3) v = v.replace(/(\d{3})(\d)/, "$1.$2");
+            if (v.length > 6) v = v.replace(/(\d{3})(\d)/, "$1.$2");
+            if (v.length > 9) v = v.replace(/(\d{3})(\d{2})$/, "$1-$2");
+
+            campo.value = v;
         }
-    }
 
-    // ============================
-    // SALVAR (CRIAR OU EDITAR)
-    // ============================
-    document.getElementById("form-colaborador").addEventListener("submit", async (e) => {
-        e.preventDefault();
+        // ============ VALIDA CPF ==================
+        function validarCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
 
-        const msg = document.getElementById("msg");
-        msg.textContent = "";
+            let soma = 0;
+            for (let i = 0; i < 9; i++) soma += parseInt(cpf[i]) * (10 - i);
+            let dig1 = (soma * 10) % 11;
+            if (dig1 === 10) dig1 = 0;
+            if (dig1 !== parseInt(cpf[9])) return false;
 
-        const dados = {
-            nome: document.getElementById("nome").value.trim(),
-            funcao: document.getElementById("funcao").value.trim(),
-            diaria: Number(document.getElementById("diaria").value),
-            tipo: document.getElementById("tipo").value,
-            status: document.getElementById("status").value
-        };
+            soma = 0;
+            for (let i = 0; i < 10; i++) soma += parseInt(cpf[i]) * (11 - i);
+            let dig2 = (soma * 10) % 11;
+            if (dig2 === 10) dig2 = 0;
 
-        try {
-            let resposta;
+            return dig2 === parseInt(cpf[10]);
+        }
 
-            if (colaboradorId) {
-                // ==============
-                // ATUALIZAR
-                // ==============
-                resposta = await fetch(`${API_URL}/colaboradores/${colaboradorId}`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    },
-                    body: JSON.stringify(dados)
-                });
+        // ============ MÁSCARA TELEFONE ===============
+        function mascaraTelefone(campo) {
+            let v = campo.value.replace(/\D/g, "");
 
-            } else {
-                // ==============
-                // CRIAR
-                // ==============
-                resposta = await fetch(`${API_URL}/colaboradores`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    },
-                    body: JSON.stringify(dados)
-                });
+            if (v.length > 2) v = v.replace(/(\d{2})(\d)/, "($1) $2");
+            if (v.length > 7) v = v.replace(/(\d{5})(\d)/, "$1-$2");
+
+            campo.value = v;
+        }
+
+        // ============ MÁSCARA CEP ===============
+        function mascaraCEP(campo) {
+            let v = campo.value.replace(/\D/g, "");
+            if (v.length > 5) v = v.replace(/(\d{5})(\d)/, "$1-$2");
+            campo.value = v;
+        }
+
+        // ============ BUSCAR CEP ==================
+        async function buscarCEP(cep) {
+            cep = cep.replace(/\D/g, '');
+            if (cep.length !== 8) return;
+
+            try {
+                const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const dados = await r.json();
+
+                if (!dados.erro) {
+                    document.getElementById("endereco").value = dados.logradouro || "";
+                    document.getElementById("cidade").value = dados.localidade || "";
+                    document.getElementById("estado").value = dados.uf || "";
+                }
+            } catch (e) {
+                console.log("Erro ao buscar CEP");
             }
+        }
 
-            const resultado = await resposta.json();
+        // ============ FORÇA UF EM MAIÚSCULAS ===============
+        document.getElementById("estado").addEventListener("input", (e) => {
+            e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2);
+        });
 
-            if (!resposta.ok) {
-                msg.textContent = resultado.error || "Erro ao salvar.";
+        // ============ ENVIO DO FORMULÁRIO ===============
+        const API_URL = "http://localhost:3000";
+        const token = localStorage.getItem("token");
+
+        document.getElementById("form-colaborador").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const cpf = document.getElementById("cpf").value;
+
+            if (!validarCPF(cpf)) {
+                alert("CPF inválido!");
                 return;
             }
 
-            // Redireciona após salvar
-            window.location.href = "../lista/lista.html";
+            const dados = {
+                nome: document.getElementById("nome").value.trim(),
+                email: document.getElementById("email").value.trim(),
+                cpf: cpf.trim(),
+                telefone: document.getElementById("telefone").value.trim(),
+                cep: document.getElementById("cep").value.trim(),
+                endereco: document.getElementById("endereco").value.trim(),
+                numero: document.getElementById("numero").value.trim(),
+                cidade: document.getElementById("cidade").value.trim(),
+                estado: document.getElementById("estado").value.trim(),
+                armazem: document.getElementById("armazem").value,
+                setor: document.getElementById("setor").value.trim(),
+                contratacao: document.getElementById("contratacao").value,
+                carga: document.getElementById("carga").value,
+                ativo: document.getElementById("ativo").value
+            };
 
-        } catch (err) {
-            msg.textContent = "Erro ao conectar ao servidor.";
-            console.error(err);
-        }
-    });
+            try {
+                const resposta = await fetch(`${API_URL}/colaboradores`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": token
+                    },
+                    body: JSON.stringify(dados)
+                });
 
-</script>
+                const result = await resposta.json();
+
+                if (!resposta.ok) {
+                    alert(result.error || "Erro ao cadastrar.");
+                    return;
+                }
+
+                alert("Colaborador cadastrado com sucesso!");
+
+                // 🔥 REDIRECIONAMENTO FUNCIONANDO
+                window.location.href = "../lista/lista.html";
+
+            } catch (err) {
+                alert("Erro ao conectar com o servidor.");
+                console.error(err);
+            }
+        });
+
+    </script>
 
 </body>
 </html>
