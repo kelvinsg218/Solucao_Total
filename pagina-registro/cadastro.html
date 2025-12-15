@@ -1,189 +1,166 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Cadastro - Logística</title>
+    <title>Cadastrar Colaborador</title>
     <link rel="stylesheet" href="cadastro.css">
 </head>
-
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Cadastro de Colaborador</h1>
-            <p>Sistema interno • Logística</p>
+
+<div class="container">
+    <h1 id="titulo">Cadastrar Colaborador</h1>
+
+    <form id="form-colaborador">
+
+        <div class="input-group">
+            <label>Nome do colaborador</label>
+            <input type="text" id="nome" required>
         </div>
 
-        <form class="form">
-            <h2>Dados Pessoais</h2>
-            <div class="grid">
-                <div class="input-group">
-                    <label>Nome Completo</label>
-                    <input id="nome" type="text" placeholder="Ex: João da Silva" required>
-                </div>
+        <div class="input-group">
+            <label>Função</label>
+            <input type="text" id="funcao" required>
+        </div>
 
-                <div class="input-group">
-                    <label>Email</label>
-                    <input id="email" type="email" placeholder="Ex: joao.silva@empresa.com" required>
-                </div>
+        <div class="input-group">
+            <label>Valor da diária</label>
+            <input type="number" id="diaria" min="0" step="0.01" required>
+        </div>
 
-                <div class="input-group">
-                    <label>CPF</label>
-                    <input id="cpf" type="text" maxlength="14" placeholder="Ex: 123.456.789-00"
-                        oninput="mascaraCPF(this)" required>
-                </div>
+        <div class="input-group">
+            <label>Tipo</label>
+            <select id="tipo" required>
+                <option value="diarista">Diarista</option>
+                <option value="fixo">Fixado</option>
+            </select>
+        </div>
 
-                <div class="input-group">
-                    <label>Telefone</label>
-                    <input id="telefone" type="text" maxlength="15" placeholder="Ex: (11) 91234-5678"
-                        oninput="mascaraTelefone(this)" required>
-                </div>
-            </div>
+        <div class="input-group">
+            <label>Status</label>
+            <select id="status" required>
+                <option value="ativo">Ativo</option>
+                <option value="inativo">Inativo</option>
+            </select>
+        </div>
 
-            <h2>Endereço</h2>
-            <div class="grid">
-                <div class="input-group">
-                    <label>CEP</label>
-                    <input id="cep" type="text" maxlength="9" placeholder="Ex: 29100-000"
-                        oninput="mascaraCEP(this); buscarCEP(this.value)" required>
-                </div>
+        <button class="btn" type="submit">Salvar</button>
+    </form>
 
-                <div class="input-group">
-                    <label>Endereço</label>
-                    <input id="endereco" type="text" placeholder="Ex: Rua das Flores" required>
-                </div>
+    <p id="msg" style="color:red; margin-top:10px;"></p>
 
-                <div class="input-group">
-                    <label>Número</label>
-                    <input id="numero" type="text" placeholder="Ex: 120">
-                </div>
+</div>
 
-                <div class="input-group">
-                    <label>Cidade</label>
-                    <input id="cidade" type="text" placeholder="Ex: Serra" required>
-                </div>
+<script>
+    const API_URL = "http://localhost:3000";
+    const token = localStorage.getItem("token");
 
-                <div class="input-group">
-                    <label>Estado</label>
-                    <input id="estado" type="text" maxlength="2" placeholder="Ex: ES" required>
-                </div>
-            </div>
+    // ============================
+    // VERIFICA LOGIN
+    // ============================
+    if (!token) {
+        window.location.href = "../login/login.html";
+    }
 
-            <h2>Dados da Empresa</h2>
-            <div class="grid">
-                <div class="input-group">
-                    <label>Armazém</label>
-                    <select id="armazem" required>
-                        <option value="">Selecione...</option>
-                        <option value="Taquara">Taquara</option>
-                        <option value="Porto Canoa">Porto Canoa</option>
-                        <option value="Civit II">Civit II</option>
-                        <option value="Log 101">Log 101</option>
-                    </select>
-                </div>
+    // ============================
+    // CAPTURA ID (EDIÇÃO)
+    // ============================
+    const urlParams = new URLSearchParams(window.location.search);
+    const colaboradorId = urlParams.get("id");
 
-                <div class="input-group">
-                    <label>Contratação</label>
-                    <select id="contratacao" required>
-                        <option value="">Selecione...</option>
-                        <option value="Diarista">Diarista</option>
-                        <option value="Funcionário">Funcionário</option>
-                    </select>
-                </div>
+    // Se for edição → carrega dados
+    if (colaboradorId) {
+        document.getElementById("titulo").textContent = "Editar Colaborador";
+        carregarColaborador();
+    }
 
-                <div class="input-group">
-                    <label>Setor</label>
-                    <input id="setor" type="text" placeholder="Ex: Separação" required>
-                </div>
+    // ============================
+    // FUNÇÃO PARA CARREGAR DADOS
+    // ============================
+    async function carregarColaborador() {
+        try {
+            const resp = await fetch(`${API_URL}/colaboradores/${colaboradorId}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
 
-                <div class="input-group">
-                    <label>Carga Horária</label>
-                    <select id="carga" required>
-                        <option value="">Selecione...</option>
-                        <option value="07:00 às 17:00">07:00 às 17:00</option>
-                        <option value="08:00 às 18:00">08:00 às 18:00</option>
-                        <option value="09:00 às 19:00">09:00 às 19:00</option>
-                        <option value="10:00 às 20:00">10:00 às 20:00</option>
-                    </select>
-                </div>
+            const dados = await resp.json();
 
-                <div class="input-group">
-                    <label>Ativo</label>
-                    <select id="ativo" required>
-                        <option value="">Selecione...</option>
-                        <option value="Sim">Sim</option>
-                        <option value="Não">Não</option>
-                    </select>
-                </div>
-            </div>
+            document.getElementById("nome").value = dados.nome;
+            document.getElementById("funcao").value = dados.funcao;
+            document.getElementById("diaria").value = dados.diaria;
+            document.getElementById("tipo").value = dados.tipo;
+            document.getElementById("status").value = dados.status;
 
-            <button type="submit" class="btn">Salvar Cadastro</button>
-        </form>
-    </div>
-
-    <script>
-        // ====== PEGAR PARÂMETRO DE EDIÇÃO ======
-        const urlParams = new URLSearchParams(window.location.search);
-        const idEdicao = urlParams.get("id"); // null se não tiver parâmetro
-
-        // ====== CARREGAR DADOS PARA EDIÇÃO ======
-        if (idEdicao !== null) {
-            const lista = JSON.parse(localStorage.getItem("colaboradores")) || [];
-            const colab = lista[idEdicao];
-            if (colab) {
-                document.getElementById("nome").value = colab.nome || "";
-                document.getElementById("email").value = colab.email || "";
-                document.getElementById("cpf").value = colab.cpf || "";
-                document.getElementById("telefone").value = colab.telefone || "";
-                document.getElementById("cep").value = colab.cep || "";
-                document.getElementById("endereco").value = colab.endereco || "";
-                document.getElementById("numero").value = colab.numero || "";
-                document.getElementById("cidade").value = colab.cidade || "";
-                document.getElementById("estado").value = colab.estado || "";
-                document.getElementById("armazem").value = colab.armazem || "";
-                document.getElementById("contratacao").value = colab.contratacao || "";
-                document.getElementById("setor").value = colab.setor || "";
-                document.getElementById("carga").value = colab.carga || "";
-                document.getElementById("ativo").value = colab.status || colab.ativo || "";
-            }
+        } catch (err) {
+            alert("Erro ao carregar colaborador.");
+            console.error(err);
         }
+    }
 
-        // ====== SALVAR CADASTRO ======
-        document.querySelector(".form").addEventListener("submit", function (e) {
-            e.preventDefault();
+    // ============================
+    // SALVAR (CRIAR OU EDITAR)
+    // ============================
+    document.getElementById("form-colaborador").addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-            const statusVal = document.getElementById("ativo").value;
+        const msg = document.getElementById("msg");
+        msg.textContent = "";
 
-            const colaborador = {
-                nome: nome.value,
-                email: email.value,
-                cpf: cpf.value,
-                telefone: telefone.value,
-                cep: cep.value,
-                endereco: endereco.value,
-                numero: numero.value,
-                cidade: cidade.value,
-                estado: estado.value,
-                armazem: armazem.value,
-                contratacao: contratacao.value,
-                setor: setor.value,
-                carga: carga.value,
-                status: statusVal
-            };
+        const dados = {
+            nome: document.getElementById("nome").value.trim(),
+            funcao: document.getElementById("funcao").value.trim(),
+            diaria: Number(document.getElementById("diaria").value),
+            tipo: document.getElementById("tipo").value,
+            status: document.getElementById("status").value
+        };
 
-            let lista = JSON.parse(localStorage.getItem("colaboradores")) || [];
+        try {
+            let resposta;
 
-            if (idEdicao !== null) {
-                lista[idEdicao] = colaborador; // atualiza
+            if (colaboradorId) {
+                // ==============
+                // ATUALIZAR
+                // ==============
+                resposta = await fetch(`${API_URL}/colaboradores/${colaboradorId}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(dados)
+                });
+
             } else {
-                lista.push(colaborador); // adiciona novo
+                // ==============
+                // CRIAR
+                // ==============
+                resposta = await fetch(`${API_URL}/colaboradores`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(dados)
+                });
             }
 
-            localStorage.setItem("colaboradores", JSON.stringify(lista));
+            const resultado = await resposta.json();
 
-            window.location.href = "../lista/lista.html"; // redireciona
-        });
-    </script>
+            if (!resposta.ok) {
+                msg.textContent = resultado.error || "Erro ao salvar.";
+                return;
+            }
+
+            // Redireciona após salvar
+            window.location.href = "../lista/lista.html";
+
+        } catch (err) {
+            msg.textContent = "Erro ao conectar ao servidor.";
+            console.error(err);
+        }
+    });
+
+</script>
+
 </body>
 </html>

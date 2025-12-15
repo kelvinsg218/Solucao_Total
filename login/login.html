@@ -8,62 +8,70 @@
 </head>
 <body>
 
-    <div id="login-container" class="container">
-        <div class="header">
-            <h1>Bem-vindo</h1>
-            <p>Login do sistema interno • Total Foods</p>
-        </div>
-
-        <form id="login-form" class="form">
-            <div class="input-group">
-                <label>Email</label>
-                <input id="login-email" type="email" required>
-            </div>
-
-            <div class="input-group">
-                <label>Senha</label>
-                <input id="login-password" type="password" required>
-            </div>
-
-            <button type="submit" class="btn">Entrar</button>
-        </form>
+<div id="login-container" class="container">
+    <div class="header">
+        <h1>Bem-vindo</h1>
+        <p>Login do sistema interno • Total Foods</p>
     </div>
 
+    <form id="login-form" class="form">
+        <div class="input-group">
+            <label>Email</label>
+            <input id="login-email" type="email" required>
+        </div>
+
+        <div class="input-group">
+            <label>Senha</label>
+            <input id="login-password" type="password" required>
+        </div>
+
+        <button type="submit" class="btn">Entrar</button>
+    </form>
+
+    <p id="msg" style="color:red; margin-top:10px;"></p>
+</div>
+
 <script>
-// =============================
-// LOGIN SIMPLES COM LOCALSTORAGE
-// =============================
+    const API_URL = "http://localhost:3000";
 
-const userData = {
-    email: "admin@totalfoods.com",
-    senha: "1234"
-};
+    // =============================
+    // ENVIO DE LOGIN PARA O BACKEND
+    // =============================
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-if (!localStorage.getItem("usuario")) {
-    localStorage.setItem("usuario", JSON.stringify(userData));
-}
+        const email = document.getElementById("login-email").value.trim();
+        const senha = document.getElementById("login-password").value.trim();
+        const msg = document.getElementById("msg");
 
-const loginForm = document.getElementById("login-form");
+        msg.textContent = "";
 
-loginForm.addEventListener("submit", function(e) {
-    e.preventDefault();
+        try {
+            const resposta = await fetch(`${API_URL}/auth/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, senha })
+            });
 
-    const email = document.getElementById("login-email").value.trim();
-    const senha = document.getElementById("login-password").value;
+            const resultado = await resposta.json();
 
-    const savedUser = JSON.parse(localStorage.getItem("usuario"));
+            if (!resposta.ok) {
+                msg.textContent = resultado.error || "Falha no login.";
+                return;
+            }
 
-    if (email === savedUser.email && senha === savedUser.senha) {
-        // marca como logado e salva email do usuário
-        localStorage.setItem("logado", "true");
-        localStorage.setItem("usuarioLogado", email);
+            // Guarda token e dados do usuário
+            localStorage.setItem("token", resultado.token);
+            localStorage.setItem("usuario", JSON.stringify(resultado.usuario));
 
-        // redireciona para a lista
-        window.location.href = "../lista/lista.html";
-    } else {
-        alert("Email ou senha incorretos.");
-    }
-});
+            // Redireciona
+            window.location.href = "../lista/lista.html";
+
+        } catch (err) {
+            msg.textContent = "Erro ao conectar ao servidor.";
+            console.error(err);
+        }
+    });
 </script>
 
 </body>
