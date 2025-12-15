@@ -19,6 +19,14 @@ app.use("/colaboradores", colaboradores);
 app.use("/dias", diasTrabalhados);
 app.use("/pagamentos", pagamentos);
 
+app.use(express.static(__dirname + "/dashboard"));
+app.use(express.static(__dirname + "/lista"));
+app.use(express.static(__dirname + "/login"));
+app.use(express.static(__dirname + "/pagina-registro"));
+app.use(express.static(__dirname + "/presenca"));
+app.use(express.static(__dirname));
+
+
 // roda verificação de inatividade sempre que o servidor sobe
 verificarInatividade();
 
