@@ -13,9 +13,7 @@
     <!-- CHART.JS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
- 
 </head>
-
 <body>
 
 <div class="container">
@@ -23,6 +21,34 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Dashboard de Colaboradores</h2>
         <a href="../lista/lista.html" class="btn btn-primary">← Voltar para a Lista</a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+
+        <div class="col-md-4">
+            <label for="filtroSetor">Filtrar por Setor</label>
+            <select id="filtroSetor" class="form-control">
+                <option value="">Todos</option>
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label for="filtroArmazem">Filtrar por Armazém</label>
+            <select id="filtroArmazem" class="form-control">
+                <option value="">Todos</option>
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label for="filtroStatus">Filtrar por Status</label>
+            <select id="filtroStatus" class="form-control">
+                <option value="">Todos</option>
+                <option value="ativo">Ativo</option>
+                <option value="inativo">Inativo</option>
+            </select>
+        </div>
+
     </div>
 
     <!-- KPIs -->
@@ -61,6 +87,7 @@
                 <canvas id="graficoSetor"></canvas>
             </div>
         </div>
+
         <div class="col-md-6 mb-4">
             <div class="card-box">
                 <h5 class="text-center">Colaboradores por Armazém</h5>
@@ -72,82 +99,152 @@
 </div>
 
 <script>
-const colaboradores = JSON.parse(localStorage.getItem("colaboradores")) || [];
 
-// ============================
-// KPIs
-// ============================
+// ----------------------------
+// VARIÁVEIS GLOBAIS
+// ----------------------------
+let colaboradores = [];
+let colaboradoresFiltrados = [];
 
-// Total
-document.getElementById("kpiTotal").innerText = colaboradores.length;
+let graficoSetorInstance = null;
+let graficoArmazemInstance = null;
 
-// Ativos e inativos
-const ativos = colaboradores.filter(c =>
-    (c.status || "").trim().toLowerCase() === "sim"
-);
+// ----------------------------
+// 1 - Carregar dados do backend
+// ----------------------------
+async function carregarColaboradores() {
+    try {
+        const res = await fetch("http://localhost:3000/colaboradores");
+        colaboradores = await res.json();
+        colaboradoresFiltrados = [...colaboradores];
 
-const inativos = colaboradores.filter(c =>
-    (c.status || "").trim().toLowerCase() === "não"
-);
+        preencherFiltros();
+        montarKPIs();
+        montarGraficos();
 
-// Diaristas
-const diaristas = colaboradores.filter(c =>
-    (c.contratacao || "").trim().toLowerCase() === "diarista"
-);
-
-document.getElementById("kpiAtivos").innerText = ativos.length;
-document.getElementById("kpiInativos").innerText = inativos.length;
-document.getElementById("kpiDiaristas").innerText = diaristas.length;
-
-// ============================
-// Gráfico por Setor
-// ============================
-const setores = {};
-colaboradores.forEach(c => {
-    if (c.setor)
-        setores[c.setor] = (setores[c.setor] || 0) + 1;
-});
-
-new Chart(document.getElementById('graficoSetor'), {
-    type: 'bar',
-    data: {
-        labels: Object.keys(setores),
-        datasets: [{
-            label: 'Qtd',
-            data: Object.values(setores),
-            backgroundColor: 'rgba(54,162,235,0.7)'
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: { legend: { display: false } }
+    } catch (err) {
+        console.error("Erro ao carregar colaboradores:", err);
+        alert("Erro ao carregar os dados do servidor!");
     }
-});
+}
 
-// ============================
-// Gráfico por Armazém
-// ============================
-const armazens = {};
-colaboradores.forEach(c => {
-    if (c.armazem)
-        armazens[c.armazem] = (armazens[c.armazem] || 0) + 1;
-});
+carregarColaboradores();
 
-new Chart(document.getElementById('graficoArmazem'), {
-    type: 'pie',
-    data: {
-        labels: Object.keys(armazens),
-        datasets: [{
-            label: 'Qtd',
-            data: Object.values(armazens),
-            backgroundColor: [
-                '#36A2EB', '#FF6384',
-                '#FFCE56', '#4BC0C0'
-            ]
-        }]
-    },
-    options: { responsive: true }
-});
+// ----------------------------
+// 2 - Preencher filtros dinamicamente
+// ----------------------------
+function preencherFiltros() {
+    const setores = [...new Set(colaboradores.map(c => c.setor))];
+    const armazens = [...new Set(colaboradores.map(c => c.armazem))];
+
+    setores.forEach(setor => {
+        const op = document.createElement("option");
+        op.value = setor;
+        op.textContent = setor;
+        document.getElementById("filtroSetor").appendChild(op);
+    });
+
+    armazens.forEach(arm => {
+        const op = document.createElement("option");
+        op.value = arm;
+        op.textContent = arm;
+        document.getElementById("filtroArmazem").appendChild(op);
+    });
+}
+
+// ----------------------------
+// 3 - KPIs
+// ----------------------------
+function montarKPIs() {
+    const lista = colaboradoresFiltrados;
+
+    document.getElementById("kpiTotal").innerText = lista.length;
+
+    const ativos = lista.filter(c => (c.status || "").toLowerCase() === "ativo");
+    const inativos = lista.filter(c => (c.status || "").toLowerCase() !== "ativo");
+    const diaristas = lista.filter(c => (c.contratacao || "").toLowerCase() === "diarista");
+
+    document.getElementById("kpiAtivos").innerText = ativos.length;
+    document.getElementById("kpiInativos").innerText = inativos.length;
+    document.getElementById("kpiDiaristas").innerText = diaristas.length;
+}
+
+// ----------------------------
+// 4 - Gráficos dinâmicos
+// ----------------------------
+function montarGraficos() {
+
+    const lista = colaboradoresFiltrados;
+
+    // ----- SETOR -----
+    const setores = {};
+    lista.forEach(c => {
+        if (c.setor) setores[c.setor] = (setores[c.setor] || 0) + 1;
+    });
+
+    if (graficoSetorInstance) graficoSetorInstance.destroy();
+
+    graficoSetorInstance = new Chart(document.getElementById("graficoSetor"), {
+        type: "bar",
+        data: {
+            labels: Object.keys(setores),
+            datasets: [{
+                label: "Qtd",
+                data: Object.values(setores),
+                backgroundColor: "rgba(54,162,235,0.7)"
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    // ----- ARMAZÉM -----
+    const armazens = {};
+    lista.forEach(c => {
+        if (c.armazem) armazens[c.armazem] = (armazens[c.armazem] || 0) + 1;
+    });
+
+    if (graficoArmazemInstance) graficoArmazemInstance.destroy();
+
+    graficoArmazemInstance = new Chart(document.getElementById("graficoArmazem"), {
+        type: "pie",
+        data: {
+            labels: Object.keys(armazens),
+            datasets: [{
+                label: "Qtd",
+                data: Object.values(armazens),
+                backgroundColor: ["#36A2EB", "#FF6384", "#FFCE56", "#4BC0C0"]
+            }]
+        },
+        options: { responsive: true }
+    });
+}
+
+// ----------------------------
+// 5 - Aplicar filtros
+// ----------------------------
+function aplicarFiltros() {
+
+    const setor = document.getElementById("filtroSetor").value;
+    const armazem = document.getElementById("filtroArmazem").value;
+    const status = document.getElementById("filtroStatus").value;
+
+    colaboradoresFiltrados = colaboradores.filter(c => {
+
+        const okSetor = setor ? c.setor === setor : true;
+        const okArmazem = armazem ? c.armazem === armazem : true;
+        const okStatus = status ? c.status?.toLowerCase() === status : true;
+
+        return okSetor && okArmazem && okStatus;
+    });
+
+    montarKPIs();
+    montarGraficos();
+}
+
+// Eventos dos filtros
+document.getElementById("filtroSetor").addEventListener("change", aplicarFiltros);
+document.getElementById("filtroArmazem").addEventListener("change", aplicarFiltros);
+document.getElementById("filtroStatus").addEventListener("change", aplicarFiltros);
 
 </script>
 
