@@ -1,279 +1,260 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Presença</title>
-    <link rel="stylesheet" href="presenca.css">
-
-    <!-- BOOTSTRAP -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    
+    <title>Sistema de Cadastro - Logística</title>
+    <link rel="stylesheet" href="cadastro.css">
 </head>
+
 <body>
-
-<div class="container container-box mt-4">
-
-    <h2>Lista de Presença</h2>
-    <a href="../lista/lista.html" class="btn btn-secondary botao-voltar-fixo">
-        ← Voltar
-    </a>
-
-
-    <p>Selecione as datas para gerar a lista</p>
-
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDatas">
-        Selecionar Datas
-    </button>
-
-    <hr>
-
-    <!-- =======================
-            FILTROS (ESCONDIDOS)
-    ======================== -->
-    <div id="areaFiltros" class="row mt-3" style="display:none;">
-
-        <div class="col-md-4">
-            <label><strong>Filtrar por Armazém</strong></label>
-            <select id="filtroArmazem" class="form-control">
-                <option value="">Todos</option>
-                <option value="Taquara">Taquara</option>
-                <option value="Porto Canoa">Porto Canoa</option>
-                <option value="Civit II">Civit II</option>
-                <option value="Log 101">Log 101</option>
-            </select>
+    <div class="container">
+        <div class="header">
+            <h1>Cadastro de Colaborador</h1>
+            <p>Sistema interno • Logística</p>
         </div>
 
-        <div class="col-md-4">
-            <label><strong>Filtrar por Setor</strong></label>
-            <input id="filtroSetor" class="form-control" type="text" placeholder="Ex: Separação">
-        </div>
+        <form class="form" id="form-colaborador">
+            <h2>Dados Pessoais</h2>
+            <div class="grid">
+                <div class="input-group">
+                    <label>Nome Completo</label>
+                    <input id="nome" type="text" placeholder="Ex: João da Silva" required>
+                </div>
 
-        <div class="col-md-4 d-flex align-items-end">
-            <button class="btn btn-dark w-100" onclick="aplicarFiltros()">Aplicar Filtros</button>
-        </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input id="email" type="email" placeholder="Ex: joao.silva@empresa.com" required>
+                </div>
 
+                <div class="input-group">
+                    <label>CPF</label>
+                    <input id="cpf" type="text" maxlength="14" placeholder="Ex: 123.456.789-00"
+                        oninput="mascaraCPF(this)" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Telefone</label>
+                    <input id="telefone" type="text" maxlength="15" placeholder="Ex: (11) 91234-5678"
+                        oninput="mascaraTelefone(this)" required>
+                </div>
+            </div>
+
+            <h2>Endereço</h2>
+            <div class="grid">
+                <div class="input-group">
+                    <label>CEP</label>
+                    <input id="cep" type="text" maxlength="9" placeholder="Ex: 29100-000"
+                        oninput="mascaraCEP(this); buscarCEP(this.value)" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Endereço</label>
+                    <input id="endereco" type="text" placeholder="Ex: Rua das Flores" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Número</label>
+                    <input id="numero" type="text" placeholder="Ex: 120">
+                </div>
+
+                <div class="input-group">
+                    <label>Cidade</label>
+                    <input id="cidade" type="text" placeholder="Ex: Serra" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Estado</label>
+                    <input id="estado" type="text" maxlength="2" placeholder="Ex: ES" required>
+                </div>
+            </div>
+
+            <h2>Dados da Empresa</h2>
+            <div class="grid">
+                <div class="input-group">
+                    <label>Armazém</label>
+                    <select id="armazem" required>
+                        <option value="">Selecione...</option>
+                        <option value="Taquara">Taquara</option>
+                        <option value="Porto Canoa">Porto Canoa</option>
+                        <option value="Civit II">Civit II</option>
+                        <option value="Log 101">Log 101</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Contratação</label>
+                    <select id="contratacao" required>
+                        <option value="">Selecione...</option>
+                        <option value="Diarista">Diarista</option>
+                        <option value="Funcionário">Funcionário</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Setor</label>
+                    <input id="setor" type="text" placeholder="Ex: Separação" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Carga Horária</label>
+                    <select id="carga" required>
+                        <option value="">Selecione...</option>
+                        <option value="07:00 às 17:00">07:00 às 17:00</option>
+                        <option value="08:00 às 18:00">08:00 às 18:00</option>
+                        <option value="09:00 às 19:00">09:00 às 19:00</option>
+                        <option value="10:00 às 20:00">10:00 às 20:00</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Ativo</label>
+                    <select id="ativo" required>
+                        <option value="">Selecione...</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">Salvar Cadastro</button>
+        </form>
     </div>
 
-    <div id="areaLista"></div>
-</div>
+    <script>
 
-<!-- ==============================
-         MODAL PARA ESCOLHER DATAS
-=================================== -->
-<div class="modal fade" id="modalDatas" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        // ============ MÁSCARA CPF ==================
+        function mascaraCPF(campo) {
+            let v = campo.value.replace(/\D/g, "");
 
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Selecionar Período</h5>
-                <button class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
+            if (v.length > 3) v = v.replace(/(\d{3})(\d)/, "$1.$2");
+            if (v.length > 6) v = v.replace(/(\d{3})(\d)/, "$1.$2");
+            if (v.length > 9) v = v.replace(/(\d{3})(\d{2})$/, "$1-$2");
 
-            <div class="modal-body">
-                <label><strong>Data inicial</strong></label>
-                <input type="date" id="dataInicio" class="form-control mb-3">
-
-                <label><strong>Data final</strong></label>
-                <input type="date" id="dataFim" class="form-control">
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button> 
-                
-                <button class="btn btn-success" id="btnGerar" disabled onclick="gerarLista()">
-                    Gerar Lista
-                </button>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-
-<!-- BOOTSTRAP JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-    let colaboradores = [];
-let colaboradoresFiltrados = [];
-
-// ===========================
-// CARREGAR DO BANCO (NODE API)
-// ===========================
-async function carregarColaboradores() {
-    try {
-        const res = await fetch("http://localhost:3000/colaboradores"); 
-        colaboradores = await res.json();
-        colaboradoresFiltrados = [...colaboradores];
-
-        console.log("Colaboradores carregados:", colaboradores);
-
-    } catch (err) {
-        console.error("Erro ao carregar colaboradores:", err);
-        alert("Erro ao conectar com o servidor!");
-    }
-}
-
-carregarColaboradores();
-
-
-    // =============================
-    // VALIDAÇÃO DE DATAS
-    // =============================
-    function validarDatas() {
-        const inicio = document.getElementById("dataInicio");
-        const fim = document.getElementById("dataFim");
-        const botao = document.getElementById("btnGerar");
-
-        if (inicio.value) fim.min = inicio.value;
-        if (fim.value) inicio.max = fim.value;
-
-        botao.disabled = !(inicio.value && fim.value && new Date(inicio.value) <= new Date(fim.value));
-    }
-
-    document.getElementById("dataInicio").addEventListener("change", validarDatas);
-    document.getElementById("dataFim").addEventListener("change", validarDatas);
-
-
-    // =============================
-    // APLICAR FILTROS
-    // =============================
-    function aplicarFiltros() {
-    const armazem = document.getElementById("filtroArmazem").value;
-    const setor = document.getElementById("filtroSetor").value.toLowerCase();
-
-    colaboradoresFiltrados = colaboradores.filter(c => {
-        const okArmazem = armazem ? c.armazem === armazem : true;
-        const okSetor = setor ? c.setor.toLowerCase().includes(setor) : true;
-        return okArmazem && okSetor;
-    });
-
-    // Verifica se as datas já foram escolhidas
-    const inicio = document.getElementById("dataInicio").value;
-    const fim = document.getElementById("dataFim").value;
-
-    if (inicio && fim) {
-        if (colaboradores.length === 0) {
-    alert("Aguarde carregar os colaboradores…");
-    return;
-}
-
-        gerarLista();  // << REGERA A LISTA COM OS FILTROS
-    } else {
-        alert("Filtros aplicados! Agora selecione as datas e gere a lista.");
-    }
-}
-
-
-
-    // =============================
-    // GERAR LISTA DE PRESENÇA
-    // =============================
-    function gerarLista() {
-        const inicio = document.getElementById("dataInicio").value;
-        const fim = document.getElementById("dataFim").value;
-
-        const area = document.getElementById("areaLista");
-
-        if (!colaboradoresFiltrados.length) {
-            area.innerHTML = `<p class="text-danger mt-3">Nenhum colaborador encontrado com esse filtro.</p>`;
-            return;
+            campo.value = v;
         }
 
-        const datas = gerarIntervaloDatas(inicio, fim);
+        // ============ VALIDA CPF ==================
+        function validarCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
 
-        let html = `
-            <div class="titulo-data">
-                Lista de Presença: <span>${formatarData(inicio)}</span> até <span>${formatarData(fim)}</span>
-            </div>
-        `;
+            let soma = 0;
+            for (let i = 0; i < 9; i++) soma += parseInt(cpf[i]) * (10 - i);
+            let dig1 = (soma * 10) % 11;
+            if (dig1 === 10) dig1 = 0;
+            if (dig1 !== parseInt(cpf[9])) return false;
 
-        datas.forEach(data => {
-            html += `
-                <h4 class="mt-4">📅 ${formatarData(data)}</h4>
+            soma = 0;
+            for (let i = 0; i < 10; i++) soma += parseInt(cpf[i]) * (11 - i);
+            let dig2 = (soma * 10) % 11;
+            if (dig2 === 10) dig2 = 0;
 
-                <table class="table table-bordered">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Nome</th>
-                            <th>Setor</th>
-                            <th>CPF</th>
-                            <th>Presença</th>
-                            <th>Comentário</th>
-                        </tr>
-                    </thead>
+            return dig2 === parseInt(cpf[10]);
+        }
 
-                    <tbody>
-                        ${colaboradoresFiltrados.map((c, i) => `
-                            <tr>
-                                <td>${c.nome}</td>
-                                <td>${c.setor}</td>
-                                <td>${c.cpf}</td>
+        // ============ MÁSCARA TELEFONE ===============
+        function mascaraTelefone(campo) {
+            let v = campo.value.replace(/\D/g, "");
 
-                                <td>
-                                    <input 
-                                        type="checkbox"
-                                        data-colab="${i}"
-                                        data-dia="${data}"
-                                        class="presencaCheck"
-                                    >
-                                </td>
+            if (v.length > 2) v = v.replace(/(\d{2})(\d)/, "($1) $2");
+            if (v.length > 7) v = v.replace(/(\d{5})(\d)/, "$1-$2");
 
-                                <td>
-                                    <input 
-                                        type="text" 
-                                        class="form-control comentarioInput"
-                                        placeholder="Ex: Trabalhou até 12:00"
-                                        data-colab="${i}"
-                                        data-dia="${data}"
-                                    >
-                                </td>
-                            </tr>
-                        `).join("")}
-                    </tbody>
-                </table>
-            `;
+            campo.value = v;
+        }
+
+        // ============ MÁSCARA CEP ===============
+        function mascaraCEP(campo) {
+            let v = campo.value.replace(/\D/g, "");
+            if (v.length > 5) v = v.replace(/(\d{5})(\d)/, "$1-$2");
+            campo.value = v;
+        }
+
+        // ============ BUSCAR CEP ==================
+        async function buscarCEP(cep) {
+            cep = cep.replace(/\D/g, '');
+            if (cep.length !== 8) return;
+
+            try {
+                const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const dados = await r.json();
+
+                if (!dados.erro) {
+                    document.getElementById("endereco").value = dados.logradouro || "";
+                    document.getElementById("cidade").value = dados.localidade || "";
+                    document.getElementById("estado").value = dados.uf || "";
+                }
+            } catch (e) {
+                console.log("Erro ao buscar CEP");
+            }
+        }
+
+        // ============ FORÇA UF EM MAIÚSCULAS ===============
+        document.getElementById("estado").addEventListener("input", (e) => {
+            e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2);
         });
 
-        area.innerHTML = html;
+        // ============ ENVIO DO FORMULÁRIO ===============
+        const API_URL = "http://localhost:3000";
+        const token = localStorage.getItem("token");
 
-        // 👉 MOSTRAR OS FILTROS SOMENTE AGORA
-        document.getElementById("areaFiltros").style.display = "flex";
+        document.getElementById("form-colaborador").addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-        // Fecha modal
-        const modalEl = document.getElementById("modalDatas");
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
-    }
+            const cpf = document.getElementById("cpf").value;
 
+            if (!validarCPF(cpf)) {
+                alert("CPF inválido!");
+                return;
+            }
 
-    // =============================
-    // GERA LISTA DE DATAS
-    // =============================
-    function gerarIntervaloDatas(inicio, fim) {
-        const atual = new Date(inicio);
-        const dataFim = new Date(fim);
-        const lista = [];
+            const dados = {
+                nome: document.getElementById("nome").value.trim(),
+                email: document.getElementById("email").value.trim(),
+                cpf: cpf.trim(),
+                telefone: document.getElementById("telefone").value.trim(),
+                cep: document.getElementById("cep").value.trim(),
+                endereco: document.getElementById("endereco").value.trim(),
+                numero: document.getElementById("numero").value.trim(),
+                cidade: document.getElementById("cidade").value.trim(),
+                estado: document.getElementById("estado").value.trim(),
+                armazem: document.getElementById("armazem").value,
+                setor: document.getElementById("setor").value.trim(),
+                contratacao: document.getElementById("contratacao").value,
+                carga: document.getElementById("carga").value,
+                ativo: document.getElementById("ativo").value
+            };
 
-        while (atual <= dataFim) {
-            lista.push(atual.toISOString().split("T")[0]);
-            atual.setDate(atual.getDate() + 1);
-        }
+            try {
+                const resposta = await fetch(`${API_URL}/colaboradores`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": token
+                    },
+                    body: JSON.stringify(dados)
+                });
 
-        return lista;
-    }
+                const result = await resposta.json();
 
+                if (!resposta.ok) {
+                    alert(result.error || "Erro ao cadastrar.");
+                    return;
+                }
 
-    // =============================
-    // FORMATAÇÃO DE DATA
-    // =============================
-    function formatarData(data) {
-        const partes = data.split("-");
-        return `${partes[2]}/${partes[1]}/${partes[0]}`;
-    }
-</script>
+                alert("Colaborador cadastrado com sucesso!");
+
+                // 🔥 REDIRECIONAMENTO FUNCIONANDO
+                window.location.href = "../lista/lista.html";
+
+            } catch (err) {
+                alert("Erro ao conectar com o servidor.");
+                console.error(err);
+            }
+        });
+
+    </script>
 
 </body>
 </html>
