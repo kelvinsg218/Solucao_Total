@@ -30,49 +30,5 @@
 
     <p id="msg" style="color:red; margin-top:10px;"></p>
 </div>
-
-<script>
-    const API_URL = "http://localhost:3000";
-
-    // =============================
-    // ENVIO DE LOGIN PARA O BACKEND
-    // =============================
-    document.getElementById("login-form").addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const email = document.getElementById("login-email").value.trim();
-        const senha = document.getElementById("login-password").value.trim();
-        const msg = document.getElementById("msg");
-
-        msg.textContent = "";
-
-        try {
-            const resposta = await fetch(`${API_URL}/auth/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, senha })
-            });
-
-            const resultado = await resposta.json();
-
-            if (!resposta.ok) {
-                msg.textContent = resultado.error || "Falha no login.";
-                return;
-            }
-
-            // Guarda token e dados do usuário
-            localStorage.setItem("token", resultado.token);
-            localStorage.setItem("usuario", JSON.stringify(resultado.usuario));
-
-            // Redireciona
-            window.location.href = "../lista/lista.html";
-
-        } catch (err) {
-            msg.textContent = "Erro ao conectar ao servidor.";
-            console.error(err);
-        }
-    });
-</script>
-
 </body>
 </html>
