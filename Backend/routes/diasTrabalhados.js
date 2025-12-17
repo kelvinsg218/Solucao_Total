@@ -1,41 +1,48 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-const calcularPagamento = require("../utils/calcularPagamento");
 
-// ===============================
-// REGISTRAR DIA TRABALHADO
-// ===============================
-router.post("/", (req, res) => {
-    const { colaborador_id, data, armazem } = req.body;
+/**
+ * LISTAR DIAS TRABALHADOS POR COLABORADOR (SEMANA)
+ * GET /dias-trabalhados/:colaborador_id?inicio=YYYY-MM-DD&fim=YYYY-MM-DD
+ */
+router.get("/:colaborador_id", (req, res) => {
+    const { colaborador_id } = req.params;
+    const { inicio, fim } = req.query;
 
-    db.get(
-        "SELECT * FROM colaboradores WHERE id=?",
-        [colaborador_id],
-        (err, colaborador) => {
-            if (err || !colaborador)
-                return res.status(404).json({ error: "Colaborador não encontrado" });
+    if (!inicio || !fim) {
+        return res.status(400).json({
+            erro: "Informe a data de início e fim (inicio=YYYY-MM-DD&fim=YYYY-MM-DD)"
+        });
+    }
 
-            const dia = new Date(data).getDay();
-            const tipo_dia = (dia === 0 || dia === 6) ? "fds" : "semana";
-            const valor = calcularPagamento(colaborador, data);
+    const sql = `
+        SELECT 
+            p.data,
+            p.presente,
+            c.nome,
+            c.valor_diaria
+        FROM presencas p
+        JOIN colaboradores c ON c.id = p.colaborador_id
+        WHERE 
+            p.colaborador_id = ?
+            AND p.presente = 1
+            AND p.data BETWEEN ? AND ?
+        ORDER BY p.data ASC
+    `;
 
-            db.run(`
-        INSERT INTO dias_trabalhados
-        (colaborador_id, data, tipo_dia, valor, armazem)
-        VALUES (?, ?, ?, ?, ?)
-      `, [colaborador_id, data, tipo_dia, valor, armazem]);
-
-            // atualiza última atividade
-            db.run(`
-        UPDATE colaboradores
-        SET ultima_atividade = ?
-        WHERE id = ?
-      `, [data, colaborador_id]);
-
-            res.json({ sucesso: true, valor });
+    db.all(sql, [colaborador_id, inicio, fim], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ erro: err.message });
         }
-    );
+
+        res.json({
+            colaborador_id,
+            periodo: { inicio, fim },
+            total_dias_trabalhados: rows.length,
+            dias: rows
+        });
+    });
 });
 
 module.exports = router;

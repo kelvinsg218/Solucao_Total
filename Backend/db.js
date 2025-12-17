@@ -1,105 +1,72 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 
-// Caminho onde o banco ficará salvo
-const dbPath = path.join(__dirname, "database.db");
+// =========================
+// CAMINHO DO BANCO
+// =========================
+// Arquivo físico do banco (NÃO é .js)
+const dbPath = path.join(__dirname, "database.sqlite");
 
-// Cria/abre o banco
-const db = new sqlite3.Database(dbPath);
+// =========================
+// CONEXÃO
+// =========================
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+        console.error("❌ Erro ao conectar no banco:", err.message);
+    } else {
+        console.log("✅ Banco conectado com sucesso");
+    }
+});
 
-// ======================================
-// CRIA TODAS AS TABELAS NECESSÁRIAS
-// ======================================
+// =========================
+// CRIAÇÃO DAS TABELAS
+// =========================
 db.serialize(() => {
 
-    // -------------------------------
+    // =========================
     // COLABORADORES
-    // -------------------------------
+    // =========================
     db.run(`
         CREATE TABLE IF NOT EXISTS colaboradores (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT,
-            email TEXT,
-            cpf TEXT UNIQUE,
-            telefone TEXT,
-            cidade TEXT,
-            estado TEXT,
-            armazem TEXT,
-            setor TEXT,
-            contratacao TEXT,
-            carga TEXT,
-            status TEXT DEFAULT 'Ativo',
-            ultima_atividade DATE,
-            criado_em DATE DEFAULT CURRENT_DATE
+            nome TEXT NOT NULL,
+            tipo TEXT NOT NULL, -- diarista | funcionario
+            valor_diaria REAL NOT NULL,
+            ativo INTEGER DEFAULT 1
         )
     `);
 
-    // -------------------------------
-    // DIAS TRABALHADOS
-    // -------------------------------
+    // =========================
+    // PRESENÇAS
+    // =========================
     db.run(`
-        CREATE TABLE IF NOT EXISTS dias_trabalhados (
+        CREATE TABLE IF NOT EXISTS presencas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            colaborador_id INTEGER,
-            data DATE,
-            tipo_dia TEXT,
-            valor REAL,
-            armazem TEXT,
+            colaborador_id INTEGER NOT NULL,
+            data TEXT NOT NULL,
+            presente INTEGER NOT NULL, -- 1 = presente | 0 = faltou
             comentario TEXT,
-            FOREIGN KEY(colaborador_id) REFERENCES colaboradores(id)
+            FOREIGN KEY (colaborador_id) REFERENCES colaboradores(id)
         )
     `);
 
-    // -------------------------------
-    // PAGAMENTOS
-    // -------------------------------
+    // =========================
+    // PAGAMENTOS (HISTÓRICO)
+    // =========================
     db.run(`
         CREATE TABLE IF NOT EXISTS pagamentos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            colaborador_id INTEGER,
-            periodo TEXT,
-            total_dias INTEGER,
-            total_valor REAL,
-            data_fechamento DATE,
-            FOREIGN KEY(colaborador_id) REFERENCES colaboradores(id)
+            colaborador_id INTEGER NOT NULL,
+            periodo_inicio TEXT NOT NULL,
+            periodo_fim TEXT NOT NULL,
+            total_dias INTEGER NOT NULL,
+            valor_diaria REAL NOT NULL,
+            total_pago REAL NOT NULL,
+            criado_em TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (colaborador_id) REFERENCES colaboradores(id)
         )
     `);
 
-    // -------------------------------
-    // USUÁRIOS DO SISTEMA (LOGIN)
-    // -------------------------------
-    db.run(`
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT,
-            email TEXT UNIQUE,
-            senha TEXT,
-            nivel TEXT DEFAULT 'admin'
-        )
-    `);
-
-    // ===========================================
-    // CRIA USUÁRIO PADRÃO CASO TABELA ESTEJA VAZIA
-    // ===========================================
-    db.get("SELECT COUNT(*) AS total FROM usuarios", (err, row) => {
-        if (!err && row.total === 0) {
-
-            console.log("🔑 Nenhum usuário encontrado. Criando administrador padrão...");
-
-            db.run(
-                `INSERT INTO usuarios (nome, email, senha, nivel)
-                 VALUES (?, ?, ?, ?)`,
-                ["Administrador", "admin@totalfoods.com", "1234", "admin"],
-                (erro) => {
-                    if (erro) {
-                        console.error("Erro ao criar admin padrão:", erro);
-                    } else {
-                        console.log("✅ Usuário admin criado: admin@totalfoods.com / 1234");
-                    }
-                }
-            );
-        }
-    });
 });
 
 module.exports = db;
